@@ -30,20 +30,28 @@
         .bill-header { display: flex; justify-content: space-between; border-bottom: 2px solid #0056b3; padding-bottom: 8px; margin-bottom: 10px; align-items: center; }
         .header-left { display: flex; align-items: center; gap: 12px; }
         
-        /* Inline Medical Cross Logo Styling */
+        /* Logo Styling */
         .shop-logo-box {
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
             background-color: #0056b3;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
         .shop-logo-box svg {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             fill: white;
+        }
+        .custom-logo-img {
+            max-width: 60px;
+            max-height: 60px;
+            object-fit: contain;
+            display: none;
         }
 
         .shop-title { font-size: 20px; font-weight: bold; color: #0056b3; }
@@ -62,7 +70,6 @@
         .info-field label { font-weight: bold; color: #0056b3; white-space: nowrap; }
         .info-field input { flex: 1; padding: 4px 8px; font-size: 13px; }
         
-        /* Print view customer text */
         .print-cust-val { display: none; font-weight: 500; }
 
         .total-section { text-align: right; margin-top: 15px; font-size: 15px; }
@@ -75,6 +82,17 @@
             .no-print, .inventory-card, .history-card { display: none !important; }
             .billing-card { width: 100%; box-shadow: none; border: none; margin: 0; padding: 0; }
             body { background: white; margin: 0; }
+            
+            .shop-logo-box {
+                display: flex !important;
+                background-color: #0056b3 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .shop-logo-box svg {
+                fill: white !important;
+            }
+
             .customer-info-box { background: transparent; border: none; padding: 0; margin-bottom: 15px; }
             .info-field input { display: none !important; }
             .print-cust-val { display: inline-block !important; }
@@ -130,12 +148,15 @@
     <div class="card billing-card">
         <div class="bill-header">
             <div class="header-left">
-                <!-- SVG Logo: Medical Cross Design -->
-                <div class="shop-logo-box">
+                <!-- Built-in Medical Cross Logo -->
+                <div class="shop-logo-box" id="defaultLogo">
                     <svg viewBox="0 0 24 24">
                         <path d="M19,10.5 H13.5 V5 C13.5,4.17 12.83,3.5 12,3.5 C11.17,3.5 10.5,4.17 10.5,5 V10.5 H5 C4.17,10.5 3.5,11.17 3.5,12 C3.5,12.83 4.17,13.5 5,13.5 H10.5 V19 C10.5,19.83 11.17,20.5 12,20.5 C12.83,20.5 13.5,19.83 13.5,19 V13.5 H19 C19.83,13.5 20.5,12.83 20.5,12 C20.5,11.17 19.83,10.5 19,10.5 Z"/>
                     </svg>
                 </div>
+                <!-- Custom Uploaded Logo Image -->
+                <img id="customLogoImg" class="custom-logo-img" alt="Shop Logo">
+
                 <div>
                     <div class="shop-title">NEW VERMA MEDICALS</div>
                     <div style="font-size: 13px; font-weight: bold;">Mob: 9955447806</div>
@@ -146,6 +167,12 @@
                 <strong style="font-size: 15px;">CASH MEMO / INVOICE</strong><br>
                 <div style="font-size: 12px;" id="billDateTime"></div>
             </div>
+        </div>
+
+        <!-- Custom Logo Upload Option -->
+        <div class="no-print" style="margin-bottom: 10px; font-size: 12px; background: #eef5ff; padding: 6px 10px; border-radius: 4px;">
+            <label style="font-weight: bold;">Upload Custom Shop Logo Image (Optional): </label>
+            <input type="file" id="logoUploader" accept="image/*" onchange="uploadLogo(event)" style="font-size: 11px;">
         </div>
 
         <!-- Customer Information Section -->
@@ -243,6 +270,34 @@
     }
     setInterval(updateDateTime, 1000);
     updateDateTime();
+
+    function uploadLogo(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const logoData = e.target.result;
+                localStorage.setItem('med_custom_logo', logoData);
+                applyLogo();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function applyLogo() {
+        const savedLogo = localStorage.getItem('med_custom_logo');
+        const defaultLogo = document.getElementById('defaultLogo');
+        const customImg = document.getElementById('customLogoImg');
+
+        if (savedLogo) {
+            defaultLogo.style.display = 'none';
+            customImg.src = savedLogo;
+            customImg.style.display = 'block';
+        } else {
+            defaultLogo.style.display = 'flex';
+            customImg.style.display = 'none';
+        }
+    }
 
     function syncCustInfo() {
         const name = document.getElementById('custName').value.trim();
@@ -441,6 +496,7 @@
         alert("Bill saved to history successfully!");
     }
 
+    applyLogo();
     renderInventory();
     renderHistory();
     addBillRow();
