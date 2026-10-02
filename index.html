@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Verma Medicals - Billing System</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { margin: 15px; background-color: #f4f7f6; color: #333; }
+        h1, h2, h3 { color: #0056b3; margin-top: 5px; }
+        .container { display: flex; gap: 15px; flex-wrap: wrap; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .inventory-card { flex: 1; min-width: 300px; }
+        .billing-card { flex: 2; min-width: 550px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; font-size: 13px; }
+        th { background-color: #0056b3; color: white; }
+        
+        input, button { padding: 6px; margin: 3px 0; border: 1px solid #ccc; border-radius: 4px; }
+        input[type="number"] { width: 70px; }
+        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; padding: 8px 12px; }
+        button:hover { background-color: #218838; }
+        .btn-danger { background-color: #dc3545; padding: 4px 8px; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-print { background-color: #17a2b8; font-size: 15px; margin-right: 10px; }
+        .btn-save { background-color: #0056b3; font-size: 15px; }
+
+        .bill-header { display: flex; justify-content: space-between; border-bottom: 2px solid #0056b3; padding-bottom: 8px; margin-bottom: 10px; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .shop-logo { max-width: 80px; max-height: 80px; object-fit: contain; border-radius: 5px; }
+        .shop-title { font-size: 22px; font-weight: bold; color: #0056b3; }
+        .customer-info { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .customer-info input { flex: 1; }
+
+        .total-section { text-align: right; margin-top: 15px; font-size: 15px; }
+        .grand-total { font-size: 18px; font-weight: bold; color: #d9534f; margin-top: 5px; }
+
+        .footer-text { margin-top: 25px; text-align: right; font-weight: bold; font-size: 14px; display: none; }
+
+        /* Print Rules */
+        @media print {
+            .no-print, .inventory-card, .history-card { display: none !important; }
+            .billing-card { width: 100%; box-shadow: none; border: none; margin: 0; padding: 0; }
+            body { background: white; margin: 0; }
+            input { border: none !important; background: transparent !important; outline: none; }
+            .hide-discount-col { display: none !important; }
+            .footer-text { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<h2 class="no-print">New Verma Medicals - Billing & Stock Management</h2>
+
+<div class="container">
+    <!-- 1. Inventory Management Section -->
+    <div class="card inventory-card no-print">
+        <h3>1. Inventory / Update Lot</h3>
+        <p style="font-size: 12px; color: #666;">Enter Code (e.g. 1, 2) to add or update Batch & MRP:</p>
+        
+        <form id="prodForm">
+            <label>Shortcut Code:</label><br>
+            <input type="number" id="pCode" required placeholder="1"><br>
+            
+            <label>Medicine Name:</label><br>
+            <input type="text" id="pName" required placeholder="Paracetamol 500mg"><br>
+            
+            <label>Company Name:</label><br>
+            <input type="text" id="pCompany" placeholder="Cipla"><br>
+            
+            <label>Batch No:</label><br>
+            <input type="text" id="pBatch" required placeholder="BCH-2026-X"><br>
+            
+            <label>MRP (₹):</label><br>
+            <input type="number" step="0.01" id="pMRP" required placeholder="20.00"><br>
+            
+            <button type="submit" style="width: 100%; margin-top: 8px;">Save to Inventory</button>
+        </form>
+
+        <h4 style="margin-top:15px;">Saved Inventory:</h4>
+        <table id="inventoryTable">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Batch</th>
+                    <th>MRP</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- 2. Billing Section -->
+    <div class="card billing-card">
+        <div class="bill-header">
+            <div class="header-left">
+                <!-- Shop Logo Tag with Updated Image Filename -->
+                <img src="Screenshot_20261002-202708_Photos-2.jpg" alt="New Verma Medicals Logo" class="shop-logo" onerror="this.style.display='none';">
+                <div>
+                    <div class="shop-title">NEW VERMA MEDICALS</div>
+                    <div style="font-size: 13px; font-weight: bold;">Mob: 9955447806</div>
+                    <div style="font-size: 12px; color: #555;">Lohar Barwa, Barwadda, Dhanbad</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <strong style="font-size: 16px;">CASH MEMO / INVOICE</strong><br>
+                <div style="font-size: 12px;" id="billDateTime"></div>
+            </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="customer-info">
+            <input type="text" id="custName" placeholder="Customer Name">
+            <input type="text" id="custPhone" placeholder="Customer Mobile No">
+        </div>
+
+        <!-- Bill Table -->
+        <table id="billTable">
+            <thead>
+                <tr>
+                    <th class="no-print">Code</th>
+                    <th>Medicine Name</th>
+                    <th>Company</th>
+                    <th>Batch No</th>
+                    <th>Qty</th>
+                    <th>MRP (₹)</th>
+                    <th class="disc-header">Disc (%)</th>
+                    <th>Amount (₹)</th>
+                    <th class="no-print">Action</th>
+                </tr>
+            </thead>
+            <tbody id="billBody"></tbody>
+        </table>
+
+        <button class="no-print" onclick="addBillRow()" style="margin-top: 8px;">+ Add New Line</button>
+
+        <!-- Total & Discount Calculation -->
+        <div class="total-section">
+            <div class="no-print" style="margin-bottom: 5px;">
+                Overall Discount (%): 
+                <input type="number" id="overallDisc" value="0" min="0" max="100" oninput="calculateGrandTotal()" style="width: 60px;">
+            </div>
+            <div id="discDisplayRow" style="display: none; font-size: 13px; color: #555;">
+                Total Discount: - ₹ <span id="discAmount">0.00</span>
+            </div>
+            <div class="grand-total">
+                Net Payable Amount: ₹ <span id="grandTotal">0.00</span>
+            </div>
+        </div>
+
+        <div class="footer-text">
+            New Verma Medicals
+        </div>
+
+        <div style="margin-top: 15px;" class="no-print">
+            <button class="btn-print" onclick="printAndSaveBill()">Save & Print Bill</button>
+            <button class="btn-save" onclick="saveBillOnly()">Save Only</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Billing History -->
+<div class="card history-card no-print">
+    <h3>3. Sales History</h3>
+    <table id="historyTable">
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Customer Name</th>
+                <th>Mobile Number</th>
+                <th>Total Amount (₹)</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+    </table>
+</div>
+
+<script>
+    // Load Inventory from LocalStorage
+    let inventory = JSON.parse(localStorage.getItem('med_inventory')) || {
+        "1": { name: "Paracetamol 500mg", company: "Cipla", batch: "B2026-A", mrp: 20.00 },
+        "2": { name: "Amoxicillin 250mg", company: "Mankind", batch: "AMX-88", mrp: 55.00 }
+    };
+    
+    let billHistory = JSON.parse(localStorage.getItem('med_history')) || [];
+
+    // Real-time Date and Time
+    function updateDateTime() {
+        const now = new Date();
+        const dateTimeStr = now.toLocaleDateString('en-IN') + ", " + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('billDateTime').innerText = "Date/Time: " + dateTimeStr;
+        return dateTimeStr;
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Render Inventory Table
+    function renderInventory() {
+        const tbody = document.getElementById('inventoryTable').querySelector('tbody');
+        tbody.innerHTML = '';
+        for (let code in inventory) {
+            let item = inventory[code];
+            tbody.innerHTML += `<tr>
+                <td><strong>${code}</strong></td>
+                <td>${item.name}</td>
+                <td>${item.batch}</td>
+                <td>₹${item.mrp}</td>
+            </tr>`;
+        }
+    }
+
+    // Save or Update Product Lot
+    document.getElementById('prodForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let code = document.getElementById('pCode').value.trim();
+        inventory[code] = {
+            name: document.getElementById('pName').value,
+            company: document.getElementById('pCompany').value,
+            batch: document.getElementById('pBatch').value,
+            mrp: parseFloat(document.getElementById('pMRP').value)
+        };
+        localStorage.setItem('med_inventory', JSON.stringify(inventory));
+        renderInventory();
+        alert(`Shortcut code ${code} saved successfully!`);
+        this.reset();
+    });
+
+    // Add Row to Bill
+    function addBillRow() {
+        const tbody = document.getElementById('billBody');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="no-print"><input type="number" class="code-input" onchange="fetchProduct(this)" placeholder="Code" style="width:50px;"></td>
+            <td><input type="text" class="p-name" placeholder="Medicine Name"></td>
+            <td><input type="text" class="p-comp" style="width:80px;"></td>
+            <td><input type="text" class="p-batch" style="width:80px;"></td>
+            <td><input type="number" class="p-qty" value="1" min="1" oninput="calculateRow(this)" style="width:50px;"></td>
+            <td><input type="number" class="p-mrp" step="0.01" oninput="calculateRow(this)" style="width:65px;"></td>
+            <td class="disc-col"><input type="number" class="p-disc" value="0" min="0" oninput="calculateRow(this)" style="width:45px;"></td>
+            <td class="p-total">0.00</td>
+            <td class="no-print"><button class="btn-danger" onclick="removeRow(this)">X</button></td>
+        `;
+        tbody.appendChild(tr);
+        tr.querySelector('.code-input').focus();
+    }
+
+    // Fetch Product Data by Code
+    function fetchProduct(inputElem) {
+        const code = inputElem.value.trim();
+        const row = inputElem.closest('tr');
+        if (inventory[code]) {
+            let item = inventory[code];
+            row.querySelector('.p-name').value = item.name;
+            row.querySelector('.p-comp').value = item.company;
+            row.querySelector('.p-batch').value = item.batch;
+            row.querySelector('.p-mrp').value = item.mrp;
+            calculateRow(inputElem);
+        } else if (code !== "") {
+            alert("Code not found in inventory! Please add it in the left panel first.");
+        }
+    }
+
+    // Calculate Each Row Total
+    function calculateRow(inputElem) {
+        const row = inputElem.closest('tr');
+        const qty = parseFloat(row.querySelector('.p-qty').value) || 0;
+        const mrp = parseFloat(row.querySelector('.p-mrp').value) || 0;
+        const disc = parseFloat(row.querySelector('.p-disc').value) || 0;
+
+        let total = qty * mrp;
+        if (disc > 0) {
+            total = total - (total * (disc / 100));
+        }
+
+        row.querySelector('.p-total').innerText = total.toFixed(2);
+        calculateGrandTotal();
+    }
+
+    // Grand Total and Discount Logic
+    function calculateGrandTotal() {
+        let subtotal = 0;
+        let hasItemDiscount = false;
+
+        document.querySelectorAll('#billBody tr').forEach(row => {
+            let total = parseFloat(row.querySelector('.p-total').innerText) || 0;
+            let disc = parseFloat(row.querySelector('.p-disc').value) || 0;
+            if (disc > 0) hasItemDiscount = true;
+            subtotal += total;
+        });
+
+        let overallDisc = parseFloat(document.getElementById('overallDisc').value) || 0;
+        let discAmount = 0;
+
+        if (overallDisc > 0) {
+            discAmount = subtotal * (overallDisc / 100);
+            document.getElementById('discDisplayRow').style.display = 'block';
+            document.getElementById('discAmount').innerText = discAmount.toFixed(2);
+        } else {
+            document.getElementById('discDisplayRow').style.display = 'none';
+        }
+
+        let finalTotal = subtotal - discAmount;
+        document.getElementById('grandTotal').innerText = finalTotal.toFixed(2);
+
+        // Hide Discount Column on Print if NO Discount is given
+        const discHeaders = document.querySelectorAll('.disc-header');
+        const discCols = document.querySelectorAll('.disc-col');
+
+        if (!hasItemDiscount && overallDisc === 0) {
+            discHeaders.forEach(el => el.classList.add('hide-discount-col'));
+            discCols.forEach(el => el.classList.add('hide-discount-col'));
+        } else {
+            discHeaders.forEach(el => el.classList.remove('hide-discount-col'));
+            discCols.forEach(el => el.classList.remove('hide-discount-col'));
+        }
+    }
+
+    function removeRow(btn) {
+        btn.closest('tr').remove();
+        calculateGrandTotal();
+    }
+
+    // Save Bill to Local Storage History
+    function saveBillToHistory() {
+        const custName = document.getElementById('custName').value.trim() || "Cash Customer";
+        const custPhone = document.getElementById('custPhone').value.trim() || "-";
+        const grandTotal = document.getElementById('grandTotal').innerText;
+        const currentDateTime = updateDateTime();
+
+        let billData = {
+            id: Date.now(),
+            dateTime: currentDateTime,
+            customer: custName,
+            phone: custPhone,
+            total: grandTotal
+        };
+
+        billHistory.unshift(billData);
+        localStorage.setItem('med_history', JSON.stringify(billHistory));
+        renderHistory();
+    }
+
+    // Render History Table
+    function renderHistory() {
+        const tbody = document.getElementById('historyBody');
+        tbody.innerHTML = '';
+        billHistory.forEach(bill => {
+            tbody.innerHTML += `<tr>
+                <td>${bill.dateTime}</td>
+                <td>${bill.customer}</td>
+                <td>${bill.phone}</td>
+                <td><strong>₹${bill.total}</strong></td>
+                <td><button onclick="alert('Customer: ${bill.customer}\\nPhone: ${bill.phone}\\nTotal Bill: ₹${bill.total}')">View</button></td>
+            </tr>`;
+        });
+    }
+
+    // Save & Print
+    function printAndSaveBill() {
+        saveBillToHistory();
+        window.print();
+    }
+
+    // Save Only
+    function saveBillOnly() {
+        saveBillToHistory();
+        alert("Bill saved to history successfully!");
+    }
+
+    // Initial Loading
+    renderInventory();
+    renderHistory();
+    addBillRow();
+</script>
+
+</body>
+</html>
