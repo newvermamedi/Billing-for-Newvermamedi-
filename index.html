@@ -18,7 +18,7 @@
         th { background-color: #0056b3; color: white; }
         
         input, button { padding: 6px; margin: 3px 0; border: 1px solid #ccc; border-radius: 4px; }
-        input[type="number"] { width: 70px; }
+        input[type="number"] { width: 65px; }
         button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; padding: 8px 12px; }
         button:hover { background-color: #218838; }
         .btn-danger { background-color: #dc3545; padding: 4px 8px; }
@@ -41,28 +41,14 @@
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .shop-logo-box svg {
-            width: 36px;
-            height: 36px;
-            fill: white;
-        }
-        .custom-logo-img {
-            max-width: 60px;
-            max-height: 60px;
-            object-fit: contain;
-            display: none;
-        }
+        .shop-logo-box svg { width: 36px; height: 36px; fill: white; }
+        .custom-logo-img { max-width: 60px; max-height: 60px; object-fit: contain; display: none; }
 
         .shop-title { font-size: 20px; font-weight: bold; color: #0056b3; }
         
         .customer-info-box { 
-            display: flex; 
-            gap: 20px; 
-            margin-bottom: 12px; 
-            background: #f8f9fa;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
+            display: flex; gap: 20px; margin-bottom: 12px; background: #f8f9fa;
+            padding: 8px 12px; border-radius: 6px; border: 1px solid #e9ecef;
         }
         .info-field { display: flex; align-items: center; gap: 6px; font-size: 13px; flex: 1; }
         .info-field label { font-weight: bold; color: #0056b3; white-space: nowrap; }
@@ -86,9 +72,7 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .shop-logo-box svg {
-                fill: white !important;
-            }
+            .shop-logo-box svg { fill: white !important; }
 
             .customer-info-box { background: transparent; border: none; padding: 0; margin-bottom: 15px; }
             .info-field input { display: none !important; }
@@ -106,14 +90,14 @@
     <!-- 1. Inventory Management Section -->
     <div class="card inventory-card no-print">
         <h3>1. Inventory / Update Lot</h3>
-        <p style="font-size: 12px; color: #666;">Enter Code to add or update Batch & MRP:</p>
+        <p style="font-size: 12px; color: #666;">Enter Code to add or update Batch, MRP & Pack size:</p>
         
         <form id="prodForm">
             <label>Shortcut Code:</label><br>
             <input type="number" id="pCode" required placeholder="1"><br>
             
             <label>Medicine Name:</label><br>
-            <input type="text" id="pName" required placeholder="Paracetamol 500mg"><br>
+            <input type="text" id="pName" required placeholder="Paracetamol 650mg"><br>
             
             <label>Company Name:</label><br>
             <input type="text" id="pCompany" placeholder="Cipla"><br>
@@ -122,10 +106,10 @@
             <input type="text" id="pBatch" required placeholder="BCH-2026-X"><br>
             
             <label>MRP (₹):</label><br>
-            <input type="number" step="0.01" id="pMRP" required placeholder="20.00"><br>
+            <input type="number" step="0.01" id="pMRP" required placeholder="60.00"><br>
             
-            <label>Quantity: Number of Tablets (Optional):</label><br>
-            <input type="number" id="pTabs" placeholder="e.g. 10 (Leave empty if N/A)"><br>
+            <label>Quantity: Number of Tablets per strip (Optional):</label><br>
+            <input type="number" id="pTabs" placeholder="e.g. 10, 15 (Optional)"><br>
             
             <button type="submit" style="width: 100%; margin-top: 8px;">Save to Inventory</button>
         </form>
@@ -193,7 +177,8 @@
                     <th>Medicine Name</th>
                     <th>Company</th>
                     <th>Batch No</th>
-                    <th>Qty</th>
+                    <th>Qty (Strips/Box)</th>
+                    <th>Tablets (Pcs)</th>
                     <th>MRP (₹)</th>
                     <th class="disc-header">Disc (%)</th>
                     <th>Amount (₹)</th>
@@ -252,8 +237,8 @@
 
 <script>
     let inventory = JSON.parse(localStorage.getItem('med_inventory')) || {
-        "1": { name: "Ventex pd", company: "-", batch: "BCH-2026", mrp: 86.68, tabs: "" },
-        "2": { name: "Amoxicillin 250mg", company: "Mankind", batch: "AMX-88", mrp: 55.00, tabs: 10 },
+        "1": { name: "Ventex pd", company: "Caplet", batch: "BCH-2026", mrp: 86.68, tabs: "" },
+        "2": { name: "Paracetamol 650mg", company: "Cipla", batch: "Xrc-2026c", mrp: 60.00, tabs: 10 },
         "100": { name: "Lactogen 1", company: "Nestle", batch: "Src-2026", mrp: 775.00, tabs: "" }
     };
     
@@ -339,13 +324,14 @@
         const tbody = document.getElementById('billBody');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td class="no-print"><input type="number" class="code-input" onchange="fetchProduct(this)" placeholder="Code" style="width:50px;"></td>
+            <td class="no-print"><input type="number" class="code-input" onchange="fetchProduct(this)" placeholder="Code" style="width:45px;"></td>
             <td><input type="text" class="p-name" placeholder="Medicine Name"></td>
-            <td><input type="text" class="p-comp" style="width:80px;"></td>
-            <td><input type="text" class="p-batch" style="width:80px;"></td>
-            <td><input type="number" class="p-qty" value="1" min="0.001" step="any" oninput="calculateRow(this)" style="width:50px;"></td>
-            <td><input type="number" class="p-mrp" step="0.01" oninput="calculateRow(this)" style="width:65px;"></td>
-            <td class="disc-col"><input type="number" class="p-disc" value="0" min="0" oninput="calculateRow(this)" style="width:45px;"></td>
+            <td><input type="text" class="p-comp" style="width:70px;"></td>
+            <td><input type="text" class="p-batch" style="width:75px;"></td>
+            <td><input type="number" class="p-qty" value="1" min="0" step="any" oninput="calculateRow(this)" style="width:45px;"></td>
+            <td><input type="number" class="p-tab-pcs" value="0" min="0" oninput="calculateRow(this)" placeholder="Pcs" style="width:45px;"></td>
+            <td><input type="number" class="p-mrp" step="0.01" oninput="calculateRow(this)" style="width:60px;"></td>
+            <td class="disc-col"><input type="number" class="p-disc" value="0" min="0" oninput="calculateRow(this)" style="width:40px;"></td>
             <td class="p-total">0.00</td>
             <td class="no-print"><button class="btn-danger" onclick="removeRow(this)">X</button></td>
         `;
@@ -362,6 +348,19 @@
             row.querySelector('.p-comp').value = item.company;
             row.querySelector('.p-batch').value = item.batch;
             row.querySelector('.p-mrp').value = item.mrp;
+            row.dataset.tabsPack = item.tabs || "";
+            
+            // Disable tab pcs input if medicine doesn't have tablet pack size
+            const tabPcsInput = row.querySelector('.p-tab-pcs');
+            if (!item.tabs) {
+                tabPcsInput.value = 0;
+                tabPcsInput.disabled = true;
+                tabPcsInput.placeholder = "N/A";
+            } else {
+                tabPcsInput.disabled = false;
+                tabPcsInput.placeholder = "Pcs";
+            }
+
             calculateRow(inputElem);
         } else if (code !== "") {
             alert("Code not found in inventory! Please add it in the left panel first.");
@@ -371,10 +370,19 @@
     function calculateRow(inputElem) {
         const row = inputElem.closest('tr');
         const qty = parseFloat(row.querySelector('.p-qty').value) || 0;
+        const tabPcs = parseFloat(row.querySelector('.p-tab-pcs').value) || 0;
         const mrp = parseFloat(row.querySelector('.p-mrp').value) || 0;
         const disc = parseFloat(row.querySelector('.p-disc').value) || 0;
+        const tabsPack = parseFloat(row.dataset.tabsPack) || 0;
 
-        let total = qty * mrp;
+        let effectiveQty = qty;
+        
+        // If pcs entered and pack size exists, calculate fraction automatically
+        if (tabPcs > 0 && tabsPack > 0) {
+            effectiveQty += (tabPcs / tabsPack);
+        }
+
+        let total = effectiveQty * mrp;
         if (disc > 0) {
             total = total - (total * (disc / 100));
         }
@@ -450,57 +458,3 @@
         billHistory.forEach(bill => {
             tbody.innerHTML += `<tr>
                 <td>${bill.dateTime}</td>
-                <td>${bill.customer}</td>
-                <td>${bill.phone}</td>
-                <td><strong>₹${bill.total}</strong></td>
-                <td>
-                    <button class="btn-view" onclick="alert('Customer: ${bill.customer}\\nPhone: ${bill.phone}\\nTotal Bill: ₹${bill.total}')">View</button>
-                    <button class="btn-danger" onclick="deleteBill(${bill.id})">Delete</button>
-                </td>
-            </tr>`;
-        });
-        calculateTodayTotal();
-    }
-
-    function calculateTodayTotal() {
-        const today = new Date().toLocaleDateString('en-IN');
-        let todaySale = 0;
-        
-        billHistory.forEach(bill => {
-            const billDate = bill.dateTime.split(',')[0].trim();
-            if (billDate === today) {
-                todaySale += parseFloat(bill.total) || 0;
-            }
-        });
-        
-        document.getElementById('todayTotal').innerText = `₹${todaySale.toFixed(2)}`;
-    }
-
-    function deleteBill(billId) {
-        if (confirm('Are you sure you want to delete this sales record?')) {
-            billHistory = billHistory.filter(bill => bill.id !== billId);
-            localStorage.setItem('med_history', JSON.stringify(billHistory));
-            renderHistory();
-        }
-    }
-
-    function printAndSaveBill() {
-        syncCustInfo();
-        saveBillToHistory();
-        window.print();
-    }
-
-    function saveBillOnly() {
-        syncCustInfo();
-        saveBillToHistory();
-        alert("Bill saved to history successfully!");
-    }
-
-    applyLogo();
-    renderInventory();
-    renderHistory();
-    addBillRow();
-</script>
-
-</body>
-</html>
