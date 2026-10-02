@@ -92,27 +92,27 @@
         <h3>1. Inventory / Update Lot</h3>
         <p style="font-size: 12px; color: #666;">Enter Code to add or update Batch, MRP & Pack size:</p>
         
-        <form id="prodForm">
+        <div>
             <label>Shortcut Code:</label><br>
-            <input type="number" id="pCode" required placeholder="1"><br>
+            <input type="number" id="pCode" placeholder="1"><br>
             
             <label>Medicine Name:</label><br>
-            <input type="text" id="pName" required placeholder="Paracetamol 650mg"><br>
+            <input type="text" id="pName" placeholder="Paracetamol 650mg"><br>
             
             <label>Company Name:</label><br>
             <input type="text" id="pCompany" placeholder="Cipla"><br>
             
             <label>Batch No:</label><br>
-            <input type="text" id="pBatch" required placeholder="BCH-2026-X"><br>
+            <input type="text" id="pBatch" placeholder="BCH-2026-X"><br>
             
             <label>MRP (₹):</label><br>
-            <input type="number" step="0.01" id="pMRP" required placeholder="60.00"><br>
+            <input type="number" step="0.01" id="pMRP" placeholder="60.00"><br>
             
             <label>Quantity: Number of Tablets per strip (Optional):</label><br>
             <input type="number" id="pTabs" placeholder="e.g. 10, 15 (Optional)"><br>
             
-            <button type="submit" style="width: 100%; margin-top: 8px;">Save to Inventory</button>
-        </form>
+            <button type="button" onclick="saveInventoryItem()" style="width: 100%; margin-top: 8px;">Save to Inventory</button>
+        </div>
 
         <h4 style="margin-top:15px;">Saved Inventory:</h4>
         <table id="inventoryTable">
@@ -188,7 +188,7 @@
             <tbody id="billBody"></tbody>
         </table>
 
-        <button class="no-print" onclick="addBillRow()" style="margin-top: 8px;">+ Add New Line</button>
+        <button type="button" class="no-print" onclick="addBillRow()" style="margin-top: 8px;">+ Add New Line</button>
 
         <div class="total-section">
             <div class="no-print" style="margin-bottom: 5px;">
@@ -208,8 +208,8 @@
         </div>
 
         <div style="margin-top: 15px;" class="no-print">
-            <button class="btn-print" onclick="printAndSaveBill()">Save & Print Bill</button>
-            <button class="btn-save" onclick="saveBillOnly()">Save Only</button>
+            <button type="button" class="btn-print" onclick="printAndSaveBill()">Save & Print Bill</button>
+            <button type="button" class="btn-save" onclick="saveBillOnly()">Save Only</button>
         </div>
     </div>
 </div>
@@ -303,22 +303,38 @@
         }
     }
 
-    document.getElementById('prodForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    function saveInventoryItem() {
         let code = document.getElementById('pCode').value.trim();
+        let name = document.getElementById('pName').value.trim();
+        let company = document.getElementById('pCompany').value.trim();
+        let batch = document.getElementById('pBatch').value.trim();
+        let mrp = parseFloat(document.getElementById('pMRP').value);
         let tabsVal = document.getElementById('pTabs').value.trim();
+
+        if (!code || !name || isNaN(mrp)) {
+            alert("Please fill at least Shortcut Code, Medicine Name, and MRP!");
+            return;
+        }
+
         inventory[code] = {
-            name: document.getElementById('pName').value,
-            company: document.getElementById('pCompany').value || "-",
-            batch: document.getElementById('pBatch').value,
-            mrp: parseFloat(document.getElementById('pMRP').value),
+            name: name,
+            company: company || "-",
+            batch: batch || "-",
+            mrp: mrp,
             tabs: tabsVal ? parseInt(tabsVal) : ""
         };
+
         localStorage.setItem('med_inventory', JSON.stringify(inventory));
         renderInventory();
         alert(`Shortcut code ${code} saved successfully!`);
-        this.reset();
-    });
+
+        document.getElementById('pCode').value = '';
+        document.getElementById('pName').value = '';
+        document.getElementById('pCompany').value = '';
+        document.getElementById('pBatch').value = '';
+        document.getElementById('pMRP').value = '';
+        document.getElementById('pTabs').value = '';
+    }
 
     function addBillRow() {
         const tbody = document.getElementById('billBody');
@@ -333,7 +349,7 @@
             <td><input type="number" class="p-mrp" step="0.01" oninput="calculateRow(this)" style="width:60px;"></td>
             <td class="disc-col"><input type="number" class="p-disc" value="0" min="0" oninput="calculateRow(this)" style="width:40px;"></td>
             <td class="p-total">0.00</td>
-            <td class="no-print"><button class="btn-danger" onclick="removeRow(this)">X</button></td>
+            <td class="no-print"><button type="button" class="btn-danger" onclick="removeRow(this)">X</button></td>
         `;
         tbody.appendChild(tr);
         tr.querySelector('.code-input').focus();
@@ -350,7 +366,6 @@
             row.querySelector('.p-mrp').value = item.mrp;
             row.dataset.tabsPack = item.tabs || "";
             
-            // Disable tab pcs input if medicine doesn't have tablet pack size
             const tabPcsInput = row.querySelector('.p-tab-pcs');
             if (!item.tabs) {
                 tabPcsInput.value = 0;
@@ -377,7 +392,6 @@
 
         let effectiveQty = qty;
         
-        // If pcs entered and pack size exists, calculate fraction automatically
         if (tabPcs > 0 && tabsPack > 0) {
             effectiveQty += (tabPcs / tabsPack);
         }
@@ -421,7 +435,7 @@
 
         if (!hasItemDiscount && overallDisc === 0) {
             discHeaders.forEach(el => el.classList.add('hide-discount-col'));
-            discCols.forEach(el => el.classList.add('hide-discount-col'));
+            discCols.forEach(el => el.classList.remove('hide-discount-col'));
         } else {
             discHeaders.forEach(el => el.classList.remove('hide-discount-col'));
             discCols.forEach(el => el.classList.remove('hide-discount-col'));
@@ -458,3 +472,58 @@
         billHistory.forEach(bill => {
             tbody.innerHTML += `<tr>
                 <td>${bill.dateTime}</td>
+                <td>${bill.customer}</td>
+                <td>${bill.phone}</td>
+                <td><strong>₹${bill.total}</strong></td>
+                <td>
+                    <button type="button" class="btn-view" onclick="alert('Customer: ${bill.customer}\\nPhone: ${bill.phone}\\nTotal Bill: ₹${bill.total}')">View</button>
+                    <button type="button" class="btn-danger" onclick="deleteBill(${bill.id})">Delete</button>
+                </td>
+            </tr>`;
+        });
+        calculateTodayTotal();
+    }
+
+    function calculateTodayTotal() {
+        const today = new Date().toLocaleDateString('en-IN');
+        let todaySale = 0;
+        
+        billHistory.forEach(bill => {
+            const billDate = bill.dateTime.split(',')[0].trim();
+            if (billDate === today) {
+                todaySale += parseFloat(bill.total) || 0;
+            }
+        });
+        
+        document.getElementById('todayTotal').innerText = `₹${todaySale.toFixed(2)}`;
+    }
+
+    function deleteBill(billId) {
+        if (confirm('Are you sure you want to delete this sales record?')) {
+            billHistory = billHistory.filter(bill => bill.id !== billId);
+            localStorage.setItem('med_history', JSON.stringify(billHistory));
+            renderHistory();
+        }
+    }
+
+    function printAndSaveBill() {
+        syncCustInfo();
+        saveBillToHistory();
+        window.print();
+    }
+
+    function saveBillOnly() {
+        syncCustInfo();
+        saveBillToHistory();
+        alert("Bill saved to history successfully!");
+    }
+
+    applyLogo();
+    renderInventory();
+    renderHistory();
+    addBillRow();
+</script>
+
+</body>
+</html>
+
