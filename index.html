@@ -23,8 +23,10 @@
         button:hover { background-color: #218838; }
         .btn-danger { background-color: #dc3545; padding: 4px 8px; }
         .btn-danger:hover { background-color: #c82333; }
-        .btn-print { background-color: #17a2b8; font-size: 15px; margin-right: 10px; }
-        .btn-save { background-color: #0056b3; font-size: 15px; }
+        .btn-print { background-color: #17a2b8; font-size: 14px; margin-right: 5px; }
+        .btn-save { background-color: #0056b3; font-size: 14px; margin-right: 5px; }
+        .btn-whatsapp { background-color: #25D366; color: white; font-size: 14px; margin-right: 5px; }
+        .btn-whatsapp:hover { background-color: #128C7E; }
         .btn-view { background-color: #28a745; font-size: 12px; padding: 4px 8px; margin-right: 5px; }
 
         .bill-header { display: flex; justify-content: space-between; border-bottom: 2px solid #0056b3; padding-bottom: 8px; margin-bottom: 10px; align-items: center; }
@@ -209,6 +211,7 @@
 
         <div style="margin-top: 15px;" class="no-print">
             <button type="button" class="btn-print" onclick="printAndSaveBill()">Save & Print Bill</button>
+            <button type="button" class="btn-whatsapp" onclick="openCustomerWhatsApp()">📱 Open WhatsApp</button>
             <button type="button" class="btn-save" onclick="saveBillOnly()">Save Only</button>
         </div>
     </div>
@@ -435,7 +438,7 @@
 
         if (!hasItemDiscount && overallDisc === 0) {
             discHeaders.forEach(el => el.classList.add('hide-discount-col'));
-            discCols.forEach(el => el.classList.remove('hide-discount-col'));
+            discCols.forEach(el => el.classList.add('hide-discount-col'));
         } else {
             discHeaders.forEach(el => el.classList.remove('hide-discount-col'));
             discCols.forEach(el => el.classList.remove('hide-discount-col'));
@@ -518,6 +521,25 @@
         alert("Bill saved to history successfully!");
     }
 
+    function openCustomerWhatsApp() {
+        const phone = document.getElementById('custPhone').value.trim();
+
+        if (!phone) {
+            alert("Please enter Customer Mobile Number first!");
+            return;
+        }
+
+        let cleanPhone = phone.replace(/[^0-9]/g, '');
+        if (cleanPhone.length === 10) {
+            cleanPhone = "91" + cleanPhone;
+        }
+
+        saveBillToHistory();
+
+        const waUrl = `https://wa.me/${cleanPhone}`;
+        window.open(waUrl, '_blank');
+    }
+
     applyLogo();
     renderInventory();
     renderHistory();
@@ -526,4 +548,3 @@
 
 </body>
 </html>
-
