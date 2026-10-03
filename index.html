@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Verma Medicals - Billing System</title>
+    <!-- PDF generate karne ke liye library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { margin: 15px; background-color: #f4f7f6; color: #333; }
@@ -132,7 +134,7 @@
     </div>
 
     <!-- 2. Billing Section -->
-    <div class="card billing-card">
+    <div class="card billing-card" id="billingCard">
         <div class="bill-header">
             <div class="header-left">
                 <div class="shop-logo-box" id="defaultLogo">
@@ -211,7 +213,7 @@
 
         <div style="margin-top: 15px;" class="no-print">
             <button type="button" class="btn-print" onclick="printAndSaveBill()">Save & Print Bill</button>
-            <button type="button" class="btn-whatsapp" onclick="openCustomerWhatsApp()">📱 Open WhatsApp</button>
+            <button type="button" class="btn-whatsapp" onclick="downloadAndShareWhatsApp()">📱 Download & Share on WhatsApp</button>
             <button type="button" class="btn-save" onclick="saveBillOnly()">Save Only</button>
         </div>
     </div>
@@ -521,7 +523,7 @@
         alert("Bill saved to history successfully!");
     }
 
-    function openCustomerWhatsApp() {
+    function downloadAndShareWhatsApp() {
         const phone = document.getElementById('custPhone').value.trim();
 
         if (!phone) {
@@ -529,15 +531,29 @@
             return;
         }
 
+        syncCustInfo();
+        saveBillToHistory();
+
         let cleanPhone = phone.replace(/[^0-9]/g, '');
         if (cleanPhone.length === 10) {
             cleanPhone = "91" + cleanPhone;
         }
 
-        saveBillToHistory();
+        const element = document.getElementById('billingCard');
+        const opt = {
+            margin:       0.2,
+            filename:     `Bill_${cleanPhone}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
 
-        const waUrl = `https://wa.me/${cleanPhone}`;
-        window.open(waUrl, '_blank');
+        // Download PDF first
+        html2pdf().set(opt).from(element).save().then(() => {
+            // Open WhatsApp after download
+            const waUrl = `https://wa.me/${cleanPhone}`;
+            window.open(waUrl, '_blank');
+        });
     }
 
     applyLogo();
