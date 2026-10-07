@@ -12,7 +12,7 @@
         h1, h2, h3 { color: #0056b3; margin-top: 5px; }
         .container { display: flex; gap: 15px; flex-wrap: wrap; }
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .inventory-card { flex: 1; min-width: 300px; }
+        .inventory-card { flex: 1; min-width: 320px; }
         .billing-card { flex: 2; min-width: 550px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -23,7 +23,7 @@
         input[type="number"] { width: 65px; }
         button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; padding: 8px 12px; }
         button:hover { background-color: #218838; }
-        .btn-danger { background-color: #dc3545; padding: 4px 8px; }
+        .btn-danger { background-color: #dc3545; padding: 4px 8px; color: white; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; }
         .btn-danger:hover { background-color: #c82333; }
         .btn-print { background-color: #17a2b8; font-size: 14px; margin-right: 5px; }
         .btn-save { background-color: #0056b3; font-size: 14px; margin-right: 5px; }
@@ -127,6 +127,7 @@
                     <th>Batch</th>
                     <th>MRP</th>
                     <th>Tabs/Pack</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -244,7 +245,8 @@
     let inventory = JSON.parse(localStorage.getItem('med_inventory')) || {
         "1": { name: "Ventex pd", company: "Caplet", batch: "BCH-2026", mrp: 86.68, tabs: "" },
         "2": { name: "Paracetamol 650mg", company: "Cipla", batch: "Xrc-2026c", mrp: 60.00, tabs: 10 },
-        "100": { name: "Lactogen 1", company: "Nestle", batch: "Src-2026", mrp: 775.00, tabs: "" }
+        "3": { name: "Nan pro 1", company: "Nestle", batch: "Src-2026", mrp: 775.00, tabs: "" },
+        "100": { name: "Lactogen 1", company: "Src-2026", batch: "Src-2026", mrp: 775.00, tabs: "" }
     };
     
     let billHistory = JSON.parse(localStorage.getItem('med_history')) || [];
@@ -304,7 +306,16 @@
                 <td>${item.batch}</td>
                 <td>₹${item.mrp}</td>
                 <td>${item.tabs ? item.tabs : '-'}</td>
+                <td><button type="button" class="btn-danger" onclick="deleteInventoryItem('${code}')">X</button></td>
             </tr>`;
+        }
+    }
+
+    function deleteInventoryItem(code) {
+        if (confirm(`Kya aap Shortcut Code ${code} ko inventory se hatana chahte hain?`)) {
+            delete inventory[code];
+            localStorage.setItem('med_inventory', JSON.stringify(inventory));
+            renderInventory();
         }
     }
 
@@ -531,6 +542,13 @@
             return;
         }
 
+        // 1. Re-calculate totals so net payable amount is accurate
+        document.querySelectorAll('#billBody tr').forEach(row => {
+            let codeInput = row.querySelector('.code-input');
+            if (codeInput) calculateRow(codeInput);
+        });
+        calculateGrandTotal();
+
         syncCustInfo();
         saveBillToHistory();
 
@@ -538,6 +556,10 @@
         if (cleanPhone.length === 10) {
             cleanPhone = "91" + cleanPhone;
         }
+
+        // 2. Hide buttons & inputs before capturing PDF
+        const noPrintElements = document.querySelectorAll('.no-print');
+        noPrintElements.forEach(el => el.style.display = 'none');
 
         const element = document.getElementById('billingCard');
         const opt = {
@@ -548,11 +570,14 @@
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
-        // Download PDF first
+        // 3. Generate PDF and restore buttons afterward
         html2pdf().set(opt).from(element).save().then(() => {
-            // Open WhatsApp after download
+            noPrintElements.forEach(el => el.style.display = '');
             const waUrl = `https://wa.me/${cleanPhone}`;
             window.open(waUrl, '_blank');
+        }).catch(err => {
+            noPrintElements.forEach(el => el.style.display = '');
+            console.error(err);
         });
     }
 
