@@ -4,81 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Verma Medicals - Billing System</title>
-    <!-- PDF generate karne ke liye library -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { margin: 15px; background-color: #f4f7f6; color: #333; }
-        h1, h2, h3 { color: #0056b3; margin-top: 5px; }
-        .container { display: flex; gap: 15px; flex-wrap: wrap; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --primary-light: #e0f2fe;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --whatsapp: #25D366;
+            --whatsapp-hover: #1da851;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        * { box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        body { margin: 0; padding: 20px; background-color: var(--bg-main); color: var(--text-main); }
+        
+        .header-title { text-align: center; color: var(--primary); font-size: 24px; font-weight: 700; margin-bottom: 20px; }
+        
+        .container { display: flex; gap: 20px; flex-wrap: wrap; max-width: 1400px; margin: 0 auto; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); margin-bottom: 20px; }
         .inventory-card { flex: 1; min-width: 320px; }
         .billing-card { flex: 2; min-width: 550px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; font-size: 13px; }
-        th { background-color: #0056b3; color: white; }
+        h3 { color: var(--text-main); font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 12px; border-bottom: 2px solid var(--primary-light); padding-bottom: 8px; }
         
-        input, button { padding: 6px; margin: 3px 0; border: 1px solid #ccc; border-radius: 4px; }
-        input[type="number"] { width: 65px; }
-        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; padding: 8px 12px; }
-        button:hover { background-color: #218838; }
-        .btn-danger { background-color: #dc3545; padding: 4px 8px; color: white; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; }
-        .btn-danger:hover { background-color: #c82333; }
-        .btn-print { background-color: #17a2b8; font-size: 14px; margin-right: 5px; }
-        .btn-save { background-color: #0056b3; font-size: 14px; margin-right: 5px; }
-        .btn-whatsapp { background-color: #25D366; color: white; font-size: 14px; margin-right: 5px; }
-        .btn-whatsapp:hover { background-color: #128C7E; }
-        .btn-view { background-color: #28a745; font-size: 12px; padding: 4px 8px; margin-right: 5px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-color); }
+        th, td { padding: 10px 12px; text-align: left; font-size: 13px; border-bottom: 1px solid var(--border-color); }
+        th { background-color: #f1f5f9; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+        
+        input, select { padding: 8px 12px; margin: 4px 0; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 13px; outline: none; transition: all 0.2s; background: #fff; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        input[type="number"] { width: 70px; }
+        
+        button { padding: 9px 16px; border-radius: var(--radius-md); border: none; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        button:active { transform: scale(0.98); }
+        
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-success:hover { background-color: var(--success-hover); }
+        .btn-danger { background-color: var(--danger); color: white; padding: 6px 10px; font-size: 12px; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+        .btn-whatsapp { background-color: var(--whatsapp); color: white; font-size: 14px; margin-right: 8px; }
+        .btn-whatsapp:hover { background-color: var(--whatsapp-hover); }
+        .btn-print { background-color: #0284c7; color: white; font-size: 14px; margin-right: 8px; }
+        .btn-save { background-color: #475569; color: white; font-size: 14px; }
+        .btn-view { background-color: var(--primary-light); color: var(--primary); padding: 5px 10px; font-size: 12px; margin-right: 5px; }
 
-        .bill-header { display: flex; justify-content: space-between; border-bottom: 2px solid #0056b3; padding-bottom: 8px; margin-bottom: 10px; align-items: center; }
-        .header-left { display: flex; align-items: center; gap: 12px; }
+        .bill-header { display: flex; justify-content: space-between; border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 15px; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
         
-        .shop-logo-box {
-            width: 55px;
-            height: 55px;
-            background-color: #0056b3;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .shop-logo-box svg { width: 36px; height: 36px; fill: white; }
+        .shop-logo-box { width: 55px; height: 55px; background: linear-gradient(135deg, #0284c7, #0369a1); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3); }
+        .shop-logo-box svg { width: 32px; height: 32px; fill: white; }
         .custom-logo-img { max-width: 60px; max-height: 60px; object-fit: contain; display: none; }
 
-        .shop-title { font-size: 20px; font-weight: bold; color: #0056b3; }
+        .shop-title { font-size: 22px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px; }
         
-        .customer-info-box { 
-            display: flex; gap: 20px; margin-bottom: 12px; background: #f8f9fa;
-            padding: 8px 12px; border-radius: 6px; border: 1px solid #e9ecef;
-        }
-        .info-field { display: flex; align-items: center; gap: 6px; font-size: 13px; flex: 1; }
-        .info-field label { font-weight: bold; color: #0056b3; white-space: nowrap; }
-        .info-field input { flex: 1; padding: 4px 8px; font-size: 13px; }
+        .customer-info-box { display: flex; gap: 15px; margin-bottom: 15px; background: #f1f5f9; padding: 12px 16px; border-radius: var(--radius-md); }
+        .info-field { display: flex; align-items: center; gap: 8px; font-size: 13px; flex: 1; }
+        .info-field label { font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+        .info-field input { flex: 1; margin: 0; }
         
-        .print-cust-val { display: none; font-weight: 500; }
+        .print-cust-val { display: none; font-weight: 600; }
 
-        .total-section { text-align: right; margin-top: 15px; font-size: 15px; }
-        .grand-total { font-size: 18px; font-weight: bold; color: #d9534f; margin-top: 5px; }
+        .total-section { text-align: right; margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border-color); }
+        .grand-total { font-size: 20px; font-weight: 700; color: #dc2626; margin-top: 6px; }
 
-        .footer-text { margin-top: 25px; text-align: right; font-weight: bold; font-size: 14px; display: none; }
+        .footer-text { margin-top: 25px; text-align: right; font-weight: 600; font-size: 14px; display: none; }
+
+        .form-group { margin-bottom: 10px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 2px; }
+        .form-group input { width: 100%; }
 
         @media print {
-            .no-print, .inventory-card, .history-card { display: none !important; }
+            .no-print, .inventory-card, .history-card, .header-title { display: none !important; }
             .billing-card { width: 100%; box-shadow: none; border: none; margin: 0; padding: 0; }
-            body { background: white; margin: 0; }
-            
-            .shop-logo-box {
-                display: flex !important;
-                background-color: #0056b3 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            .shop-logo-box svg { fill: white !important; }
-
-            .customer-info-box { background: transparent; border: none; padding: 0; margin-bottom: 15px; }
+            body { background: white; margin: 0; padding: 0; }
+            .customer-info-box { background: transparent; padding: 0; margin-bottom: 15px; }
             .info-field input { display: none !important; }
             .print-cust-val { display: inline-block !important; }
             .hide-discount-col { display: none !important; }
@@ -88,37 +105,44 @@
 </head>
 <body>
 
-<h2 class="no-print">New Verma Medicals - Billing & Stock Management</h2>
+<h2 class="header-title no-print">New Verma Medicals — Billing & Stock Portal</h2>
 
 <div class="container">
     <!-- 1. Inventory Management Section -->
     <div class="card inventory-card no-print">
-        <h3>1. Inventory / Update Lot</h3>
-        <p style="font-size: 12px; color: #666;">Enter Code to add or update Batch, MRP & Pack size:</p>
+        <h3>1. Inventory / Lot Management</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Add or update medicine batch, MRP & package size:</p>
         
         <div>
-            <label>Shortcut Code:</label><br>
-            <input type="number" id="pCode" placeholder="1"><br>
+            <div class="form-group">
+                <label>Shortcut Code:</label>
+                <input type="number" id="pCode" placeholder="e.g. 1">
+            </div>
+            <div class="form-group">
+                <label>Medicine Name:</label>
+                <input type="text" id="pName" placeholder="Paracetamol 650mg">
+            </div>
+            <div class="form-group">
+                <label>Company Name:</label>
+                <input type="text" id="pCompany" placeholder="Cipla">
+            </div>
+            <div class="form-group">
+                <label>Batch No:</label>
+                <input type="text" id="pBatch" placeholder="BCH-2026-X">
+            </div>
+            <div class="form-group">
+                <label>MRP (₹):</label>
+                <input type="number" step="0.01" id="pMRP" placeholder="60.00">
+            </div>
+            <div class="form-group">
+                <label>Tablets per Strip/Pack (Optional):</label>
+                <input type="number" id="pTabs" placeholder="e.g. 10, 15">
+            </div>
             
-            <label>Medicine Name:</label><br>
-            <input type="text" id="pName" placeholder="Paracetamol 650mg"><br>
-            
-            <label>Company Name:</label><br>
-            <input type="text" id="pCompany" placeholder="Cipla"><br>
-            
-            <label>Batch No:</label><br>
-            <input type="text" id="pBatch" placeholder="BCH-2026-X"><br>
-            
-            <label>MRP (₹):</label><br>
-            <input type="number" step="0.01" id="pMRP" placeholder="60.00"><br>
-            
-            <label>Quantity: Number of Tablets per strip (Optional):</label><br>
-            <input type="number" id="pTabs" placeholder="e.g. 10, 15 (Optional)"><br>
-            
-            <button type="button" onclick="saveInventoryItem()" style="width: 100%; margin-top: 8px;">Save to Inventory</button>
+            <button type="button" class="btn-primary" onclick="saveInventoryItem()" style="width: 100%; margin-top: 10px;">+ Save to Inventory</button>
         </div>
 
-        <h4 style="margin-top:15px;">Saved Inventory:</h4>
+        <h4 style="margin-top:20px; font-size: 14px; color: var(--text-muted);">Saved Inventory:</h4>
         <table id="inventoryTable">
             <thead>
                 <tr>
@@ -147,18 +171,18 @@
 
                 <div>
                     <div class="shop-title">NEW VERMA MEDICALS</div>
-                    <div style="font-size: 13px; font-weight: bold;">Mob: 9955447806</div>
-                    <div style="font-size: 12px; color: #555;">Lohar Barwa, Barwaddah, Dhanbad</div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-main);">Mob: 9955447806</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Lohar Barwa, Barwaddah, Dhanbad</div>
                 </div>
             </div>
             <div style="text-align: right;">
-                <strong style="font-size: 15px;">CASH MEMO / INVOICE</strong><br>
-                <div style="font-size: 12px;" id="billDateTime"></div>
+                <strong style="font-size: 14px; color: var(--primary);">CASH MEMO / INVOICE</strong><br>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;" id="billDateTime"></div>
             </div>
         </div>
 
-        <div class="no-print" style="margin-bottom: 10px; font-size: 12px; background: #eef5ff; padding: 6px 10px; border-radius: 4px;">
-            <label style="font-weight: bold;">Upload Custom Shop Logo Image (Optional): </label>
+        <div class="no-print" style="margin-bottom: 12px; font-size: 12px; background: #f0f9ff; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid #bae6fd;">
+            <label style="font-weight: 600; color: var(--primary);">Shop Logo Image (Optional): </label>
             <input type="file" id="logoUploader" accept="image/*" onchange="uploadLogo(event)" style="font-size: 11px;">
         </div>
 
@@ -193,15 +217,15 @@
             <tbody id="billBody"></tbody>
         </table>
 
-        <button type="button" class="no-print" onclick="addBillRow()" style="margin-top: 8px;">+ Add New Line</button>
+        <button type="button" class="btn-primary no-print" onclick="addBillRow()" style="margin-top: 12px; font-size: 12px;">+ Add Item Line</button>
 
         <div class="total-section">
-            <div class="no-print" style="margin-bottom: 5px;">
+            <div class="no-print" style="margin-bottom: 8px; font-size: 13px;">
                 Overall Discount (%): 
                 <input type="number" id="overallDisc" value="0" min="0" max="100" oninput="calculateGrandTotal()" style="width: 60px;">
             </div>
-            <div id="discDisplayRow" style="display: none; font-size: 13px; color: #555;">
-                Total Discount: - ₹ <span id="discAmount">0.00</span>
+            <div id="discDisplayRow" style="display: none; font-size: 13px; color: var(--text-muted);">
+                Total Discount Saved: - ₹ <span id="discAmount">0.00</span>
             </div>
             <div class="grand-total">
                 Net Payable Amount: ₹ <span id="grandTotal">0.00</span>
@@ -209,22 +233,22 @@
         </div>
 
         <div class="footer-text">
-            New Verma Medicals
+            Thank you! — New Verma Medicals
         </div>
 
-        <div style="margin-top: 15px;" class="no-print">
-            <button type="button" class="btn-print" onclick="printAndSaveBill()">Save & Print Bill</button>
-            <button type="button" class="btn-whatsapp" onclick="downloadAndShareWhatsApp()">📱 Download & Share on WhatsApp</button>
-            <button type="button" class="btn-save" onclick="saveBillOnly()">Save Only</button>
+        <div style="margin-top: 20px;" class="no-print">
+            <button type="button" class="btn-print" onclick="printAndSaveBill()">🖨️ Save & Print Bill</button>
+            <button type="button" class="btn-whatsapp" onclick="sendBillViaWhatsAppMsg()">📱 Send Bill via WhatsApp</button>
+            <button type="button" class="btn-save" onclick="saveBillOnly()">💾 Save Only</button>
         </div>
     </div>
 </div>
 
-<div class="card history-card no-print">
+<div class="card history-card no-print" style="max-width: 1400px; margin: 0 auto 20px auto;">
     <h3>
         3. Sales History 
-        <span style="font-size: 14px; color: #555; float: right;">
-            Today's Total Sale: <strong id="todayTotal" style="color: #0056b3;">₹0.00</strong>
+        <span style="font-size: 14px; color: var(--text-muted); float: right;">
+            Today's Total Sale: <strong id="todayTotal" style="color: var(--primary);">₹0.00</strong>
         </span>
     </h3>
     <table id="historyTable">
@@ -254,7 +278,7 @@
     function updateDateTime() {
         const now = new Date();
         const dateTimeStr = now.toLocaleDateString('en-IN') + ", " + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        document.getElementById('billDateTime').innerText = "Date/Time: " + dateTimeStr;
+        document.getElementById('billDateTime').innerText = "Date: " + dateTimeStr;
         return dateTimeStr;
     }
     setInterval(updateDateTime, 1000);
@@ -306,13 +330,13 @@
                 <td>${item.batch}</td>
                 <td>₹${item.mrp}</td>
                 <td>${item.tabs ? item.tabs : '-'}</td>
-                <td><button type="button" class="btn-danger" onclick="deleteInventoryItem('${code}')">X</button></td>
+                <td><button type="button" class="btn-danger" onclick="deleteInventoryItem('${code}')">✕</button></td>
             </tr>`;
         }
     }
 
     function deleteInventoryItem(code) {
-        if (confirm(`Kya aap Shortcut Code ${code} ko inventory se hatana chahte hain?`)) {
+        if (confirm(`Shortcut Code ${code} ko inventory se hatayein?`)) {
             delete inventory[code];
             localStorage.setItem('med_inventory', JSON.stringify(inventory));
             renderInventory();
@@ -328,7 +352,7 @@
         let tabsVal = document.getElementById('pTabs').value.trim();
 
         if (!code || !name || isNaN(mrp)) {
-            alert("Please fill at least Shortcut Code, Medicine Name, and MRP!");
+            alert("Minimum details: Shortcut Code, Medicine Name, and MRP!");
             return;
         }
 
@@ -342,7 +366,6 @@
 
         localStorage.setItem('med_inventory', JSON.stringify(inventory));
         renderInventory();
-        alert(`Shortcut code ${code} saved successfully!`);
 
         document.getElementById('pCode').value = '';
         document.getElementById('pName').value = '';
@@ -356,16 +379,16 @@
         const tbody = document.getElementById('billBody');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td class="no-print"><input type="number" class="code-input" onchange="fetchProduct(this)" placeholder="Code" style="width:45px;"></td>
-            <td><input type="text" class="p-name" placeholder="Medicine Name"></td>
+            <td class="no-print"><input type="number" class="code-input" onchange="fetchProduct(this)" placeholder="Code" style="width:50px;"></td>
+            <td><input type="text" class="p-name" placeholder="Medicine Name" style="width:100%;"></td>
             <td><input type="text" class="p-comp" style="width:70px;"></td>
             <td><input type="text" class="p-batch" style="width:75px;"></td>
-            <td><input type="number" class="p-qty" value="1" min="0" step="any" oninput="calculateRow(this)" style="width:45px;"></td>
-            <td><input type="number" class="p-tab-pcs" value="0" min="0" oninput="calculateRow(this)" placeholder="Pcs" style="width:45px;"></td>
-            <td><input type="number" class="p-mrp" step="0.01" oninput="calculateRow(this)" style="width:60px;"></td>
-            <td class="disc-col"><input type="number" class="p-disc" value="0" min="0" oninput="calculateRow(this)" style="width:40px;"></td>
-            <td class="p-total">0.00</td>
-            <td class="no-print"><button type="button" class="btn-danger" onclick="removeRow(this)">X</button></td>
+            <td><input type="number" class="p-qty" value="1" min="0" step="any" oninput="calculateRow(this)" style="width:50px;"></td>
+            <td><input type="number" class="p-tab-pcs" value="0" min="0" oninput="calculateRow(this)" placeholder="Pcs" style="width:50px;"></td>
+            <td><input type="number" class="p-mrp" step="0.01" oninput="calculateRow(this)" style="width:65px;"></td>
+            <td class="disc-col"><input type="number" class="p-disc" value="0" min="0" oninput="calculateRow(this)" style="width:45px;"></td>
+            <td class="p-total" style="font-weight:600;">0.00</td>
+            <td class="no-print"><button type="button" class="btn-danger" onclick="removeRow(this)">✕</button></td>
         `;
         tbody.appendChild(tr);
         tr.querySelector('.code-input').focus();
@@ -394,7 +417,7 @@
 
             calculateRow(inputElem);
         } else if (code !== "") {
-            alert("Code not found in inventory! Please add it in the left panel first.");
+            alert("Code inventory me nahi mila!");
         }
     }
 
@@ -493,7 +516,7 @@
                 <td><strong>₹${bill.total}</strong></td>
                 <td>
                     <button type="button" class="btn-view" onclick="alert('Customer: ${bill.customer}\\nPhone: ${bill.phone}\\nTotal Bill: ₹${bill.total}')">View</button>
-                    <button type="button" class="btn-danger" onclick="deleteBill(${bill.id})">Delete</button>
+                    <button type="button" class="btn-danger" onclick="deleteBill(${bill.id})">✕</button>
                 </td>
             </tr>`;
         });
@@ -505,7 +528,7 @@
         let todaySale = 0;
         
         billHistory.forEach(bill => {
-            const billDate = bill.dateTime.split(',')[0].trim();
+            const billDate = bill.dateTime.split(',')[0].replace('Date: ', '').trim();
             if (billDate === today) {
                 todaySale += parseFloat(bill.total) || 0;
             }
@@ -515,7 +538,7 @@
     }
 
     function deleteBill(billId) {
-        if (confirm('Are you sure you want to delete this sales record?')) {
+        if (confirm('Delete sales record?')) {
             billHistory = billHistory.filter(bill => bill.id !== billId);
             localStorage.setItem('med_history', JSON.stringify(billHistory));
             renderHistory();
@@ -531,54 +554,100 @@
     function saveBillOnly() {
         syncCustInfo();
         saveBillToHistory();
-        alert("Bill saved to history successfully!");
+        alert("Bill saved successfully!");
     }
 
-    function downloadAndShareWhatsApp() {
+    function sendBillViaWhatsAppMsg() {
         const phone = document.getElementById('custPhone').value.trim();
+        const custName = document.getElementById('custName').value.trim() || "Customer";
 
         if (!phone) {
             alert("Please enter Customer Mobile Number first!");
             return;
         }
 
-        // 1. Re-calculate totals so net payable amount is accurate
         document.querySelectorAll('#billBody tr').forEach(row => {
             let codeInput = row.querySelector('.code-input');
             if (codeInput) calculateRow(codeInput);
         });
         calculateGrandTotal();
 
-        syncCustInfo();
-        saveBillToHistory();
-
         let cleanPhone = phone.replace(/[^0-9]/g, '');
         if (cleanPhone.length === 10) {
             cleanPhone = "91" + cleanPhone;
         }
 
-        // 2. Hide buttons & inputs before capturing PDF
-        const noPrintElements = document.querySelectorAll('.no-print');
-        noPrintElements.forEach(el => el.style.display = 'none');
+        let itemsText = "";
+        let count = 1;
+        let totalMRP = 0;
 
-        const element = document.getElementById('billingCard');
-        const opt = {
-            margin:       0.2,
-            filename:     `Bill_${cleanPhone}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
+        document.querySelectorAll('#billBody tr').forEach(row => {
+            let name = row.querySelector('.p-name').value.trim();
+            let batch = row.querySelector('.p-batch').value.trim();
+            let qty = parseFloat(row.querySelector('.p-qty').value) || 0;
+            let tabPcs = parseFloat(row.querySelector('.p-tab-pcs').value) || 0;
+            let mrp = parseFloat(row.querySelector('.p-mrp').value) || 0;
+            let disc = parseFloat(row.querySelector('.p-disc').value) || 0;
+            let tabsPack = parseFloat(row.dataset.tabsPack) || 0;
 
-        // 3. Generate PDF and restore buttons afterward
-        html2pdf().set(opt).from(element).save().then(() => {
-            noPrintElements.forEach(el => el.style.display = '');
-            const waUrl = `https://wa.me/${cleanPhone}`;
-            window.open(waUrl, '_blank');
-        }).catch(err => {
-            noPrintElements.forEach(el => el.style.display = '');
-            console.error(err);
+            if (name) {
+                let effectiveQty = qty;
+                if (tabPcs > 0 && tabsPack > 0) {
+                    effectiveQty += (tabPcs / tabsPack);
+                }
+                totalMRP += (effectiveQty * mrp);
+
+                itemsText += `${count}. *${name}*\n`;
+                if (batch) itemsText += `   • Batch: ${batch}\n`;
+                
+                let qtyStr = "";
+                if (qty > 0 && tabPcs > 0) {
+                    qtyStr = `${qty} Pack (${tabPcs} Pcs)`;
+                } else if (qty > 0) {
+                    qtyStr = `${qty} Pack`;
+                } else if (tabPcs > 0) {
+                    qtyStr = `${tabPcs} Pcs`;
+                }
+
+                if (qtyStr) {
+                    itemsText += `   • Qty: ${qtyStr}\n`;
+                }
+
+                itemsText += `   • MRP: ₹${mrp.toFixed(2)}\n`;
+                
+                if (disc > 0) {
+                    itemsText += `   • Disc: ${disc}%\n`;
+                }
+
+                itemsText += `\n`;
+                count++;
+            }
         });
+
+        if (!itemsText) {
+            alert("Please add at least one medicine item!");
+            return;
+        }
+
+        syncCustInfo();
+        saveBillToHistory();
+
+        const grandTotal = parseFloat(document.getElementById('grandTotal').innerText) || 0;
+        const totalDiscount = totalMRP - grandTotal;
+        const currentDateTime = updateDateTime();
+
+        let message = `🏥 *NEW VERMA MEDICALS*\nMob: 9955447806\nLohar Barwa, Barwaddah, Dhanbad\n--------------------------------\n`;
+        message += `👤 *Customer:* ${custName}\n📞 *Mobile:* ${phone}\n📅 *${currentDateTime}*\n--------------------------------\n`;
+        message += `*Items Purchased:*\n\n${itemsText}--------------------------------\n`;
+        message += `💵 *Total MRP: ₹${totalMRP.toFixed(2)}*\n`;
+        if (totalDiscount > 0) {
+            message += `🏷️ *Total Discount: ₹${totalDiscount.toFixed(2)}*\n`;
+        }
+        message += `💰 *Net Payable Amount: ₹${grandTotal.toFixed(2)}*\n--------------------------------\n`;
+        message += `Thank you for visiting New Verma Medicals! 🙏`;
+
+        const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank');
     }
 
     applyLogo();
